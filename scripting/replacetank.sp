@@ -2,20 +2,18 @@
 #include <sourcemod>
 #include <left4downtown>
 
-#define NYX_DEBUG           0
-#define NYX_PLUGIN_TAG      "SM"
-#include <nyxtools>
 #undef REQUIRE_PLUGIN
+#undef REQUIRE_EXTENSIONS
+#include <nyxtools>
 #include <nyxtools_l4d2>
-#define REQUIRE_PLUGIN
 
 #pragma newdecls required
 
 public Plugin myinfo = {
   name = "Replace Tank",
   author = NYXTOOLS_AUTHOR,
-  description = "",
-  version = NYXTOOLS_VERSION,
+  description = "Give players the option to pass the tank",
+  version = "1.0.0",
   url = NYXTOOLS_WEBSITE
 };
 
