@@ -97,6 +97,7 @@ public Action ConCmd_PassTank(int client, int args) {
       for (int i = 1; i <= MaxClients; i++) {
         if (!IsValidClient(i, true)) continue;
         if (IsPlayerSurvivor(i)) continue;
+        if (IsPlayerAlive(i) && !IsPlayerGhost(i)) continue;
         if (client == i) continue;
 
         playerList[playerCount++] = i;
@@ -108,8 +109,17 @@ public Action ConCmd_PassTank(int client, int args) {
     target = GetCmdTarget(1, client);
   }
 
-  L4D_ReplaceTank(client, target);
-  NyxMsgAll("%N passed the Tank to %N", client, target);
+  if (GetEntProp(client, Prop_Send, "m_nSequence") >= 65) { // start of tank death animation 67-77
+    return Plugin_Handled;
+  }
+
+  if (IsValidClient(target)) {
+    if (IsPlayerAlive(target) && !IsPlayerGhost(target))
+      return Plugin_Handled;
+
+    L4D_ReplaceTank(client, target);
+    NyxMsgAll("%N passed the Tank to %N", client, target);
+  }
 
   return Plugin_Handled;
 }
@@ -144,6 +154,10 @@ public int Menu_GiveTank(Menu menu, MenuAction action, int param1, int param2) {
     if (!IsValidClient(target)) {
       NyxMsgClient(param1, "%t", "Player no longer available");
     } else {
+      if (GetEntProp(param1, Prop_Send, "m_nSequence") >= 65) { // start of tank death animation 67-77
+        return;
+      }
+
       L4D_ReplaceTank(param1, target);
       NyxMsgAll("%N passed the Tank to %N", param1, target);
     }
@@ -197,8 +211,9 @@ stock int AddTeamToMenu(Menu menu, int client, bool filterBots=true) {
 
   for (int i = 1; i <= MaxClients; i++) {
     if (!IsValidClient(i, filterBots)) continue;
-    if (i == client) continue;
     if (GetClientTeam(i) != GetClientTeam(client)) continue;
+    if (IsPlayerAlive(i) && !IsPlayerGhost(i)) continue;
+    if (i == client) continue;
 
     IntToString(GetClientUserId(i), user_id, sizeof(user_id));
     GetClientName(i, name, sizeof(name));
